@@ -1,0 +1,116 @@
+﻿@model CreateBoekViewModel
+
+<h2>Nieuw Boek Toevoegen</h2>
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="Create" asp-controller="Boeken" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <label asp-for="Boek.Titel"></label>
+                <input asp-for="Boek.Titel" class="form-control" />
+                <span asp-validation-for="Boek.Titel" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="SelectedAuteurId" class="control-label"></label>
+                <select asp-for="SelectedAuteurId" class="form-control" 
+                asp-items="@(new SelectList(Model.Auteurs, "AuteurId", "Naam"))"></select>
+                <span asp-validation-for="SelectedAuteurId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                
+                <div class="form-group">
+                    <input type="checkbox" asp-for="Boek.IsAvailable" class="form-check-input"/>
+                    <label>Beschikbaar</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+               
+                <div class="form-group">
+                    <input type="checkbox" asp-for="Boek.IsNewRelease" class="form-check-input" />
+                    <label>New Uitgave</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+               
+                <div class="form-group">
+                    <input type="checkbox" asp-for="Boek.IsBestSeller" class="form-check-input" />
+                    <label>Best seller</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label><b>Type Binding</b></label>
+                <div class="form-check">
+                    <input type="radio" asp-for="Boek.BindingType" value="Hardcover" class="form-check-input"> Hardcover</input>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-check">
+                    <input type="radio" asp-for="Boek.BindingType" value="Paperback" class="form-check-input"> Paperback</input>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-check">
+                    <input type="radio" asp-for="Boek.BindingType" value="Ebook" class="form-check-input"> Ebook</input>
+                </div>
+            </div>
+            <span asp-validation-for="Boek.BindingType" class="text-danger"></span>
+            
+            <div class="form-group">
+                <label><b>Genres</b></label><br />
+                @foreach (var genre in Model.Genres)
+                {
+
+                    <div class="form-check">
+                        <input type="checkbox" name="SelectedGenres" value="@genre.GenreId" 
+                        class="form-check-input"/>
+                        <label class="form-check-label">@genre.Naam</label>
+                    </div>
+                }
+            </div>
+
+            <div class="form-group">
+                <label><b>Afbeelding</b></label>
+                <input type="file" asp-for="Afbeelding" class="form-control-file" onchange="previewImage(event)"/>
+                <span asp-validation-for="Afbeelding" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label><b>Afbeelding</b></label>
+                <img id="afbeeldingPreview" src="@Model.AfbeeldingPad" class="img-thumbnail img-fluid" 
+                style="width: 150px; height: 200px; margin-right: 15px;" alt="Boek Afbeelding" />
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Opslaan" class="btn btn-primary" />
+            </div>
+           
+            <div class="my-2">
+                <a asp-action="Index" class="btn btn-secondary">Terug naar Index</a>
+            </div>
+        </form>
+        
+
+    </div>
+</div>
+@section Scripts {
+    <script>
+        function previewImage(event) {
+            var reader = new FileReader();
+            reader.onload = function () {
+                var output = document.getElementById('afbeeldingPreview');
+                output.style.display = 'block';
+                output.src = reader.result;
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
+}

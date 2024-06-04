@@ -17,6 +17,7 @@ namespace ManyToManyApp
                 options.UseSqlServer(builder.Configuration.GetConnectionString("ManyToManyContext"));
             });
 
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
