@@ -23,7 +23,7 @@ namespace ManyToManyApp.Controllers
                 .Include(b => b.BoekGenres)
                     .ThenInclude(bg => bg.Genre)
                 .ToListAsync();
-            
+
             ViewBag.Count = boeken.Count();
             if (boeken == null || !boeken.Any())
             {
@@ -39,7 +39,7 @@ namespace ManyToManyApp.Controllers
                 IsAvailable = b.IsAvailable,
                 IsNewRelease = b.IsNewRelease,
                 IsBestSeller = b.IsBestSeller,
-                BindingType = b.BindingType.HasValue ? b.BindingType.Value.ToString() : "onbekend" 
+                BindingType = b.BindingType.HasValue ? b.BindingType.Value.ToString() : "onbekend"
 
             }).ToList();
 
@@ -65,9 +65,9 @@ namespace ManyToManyApp.Controllers
         {
             if (ModelState.IsValid)
             {
-               string? afbeeldingpad = viewModel.Afbeelding != null && viewModel.Afbeelding.Length > 0
-                    ? await UploadFile(viewModel.Afbeelding)
-                    : "/images/default.jpg";
+                string? afbeeldingpad = viewModel.Afbeelding != null && viewModel.Afbeelding.Length > 0
+                     ? await UploadFile(viewModel.Afbeelding)
+                     : "/images/default.jpg";
                 var newBoek = new Boek
                 {
                     Titel = viewModel.Boek.Titel,
@@ -93,7 +93,7 @@ namespace ManyToManyApp.Controllers
                         };
                         _context.BoekGenres.Add(boekGenres);
                     }
-                    
+
                     await _context.SaveChangesAsync();
                 }
 
@@ -120,6 +120,104 @@ namespace ManyToManyApp.Controllers
             return "/images/" + uniqueFileName;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var boek = await _context.Boeken
+                .Include(b => b.BoekGenres)
+                .ThenInclude(bg => bg.Genre)
+                .FirstOrDefaultAsync(b => b.BoekId == id);
+
+            if (boek == null)
+            {
+                return NotFound();
+            }
+
+            var viewModel = new EditBoekViewModel
+            {
+                BoekId = boek.BoekId,
+                Titel = boek.Titel,
+                SelectedAuteurId = boek.AuteurId,
+                SelectedGenres = boek.BoekGenres.Select(bg => bg.GenreId).ToList(),
+                IsAvailable = boek.IsAvailable, 
+                IsNewRelease = boek.IsNewRelease,
+                IsBestSeller = boek.IsBestSeller,
+                BindingType = boek.BindingType,
+                Auteurs = await _context.Auteurs.ToListAsync(),
+                Genres = await _context.Genres.ToListAsync(),
+                AfbeeldingPad = boek.Afbeeldingpad
+
+            };
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, EditBoekViewModel viewModel)
+        {
+            if (id != viewModel.BoekId)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                var boek = await _context.Boeken
+                    .Include(b => b.BoekGenres)
+                    .FirstOrDefaultAsync(b => b.BoekId == id);
+                if (boek == null)
+                {
+                    return NotFound();
+                }
+                // selecteer image
+                string? afbeeldingPad = boek.Afbeeldingpad;
+                if (viewModel.Afbeelding != null && viewModel.Afbeelding.Length > 0)
+                {
+                    afbeeldingPad = await UploadFile(viewModel.Afbeelding);
+                }
+
+                // update boek
+                boek.Titel = viewModel.Titel;
+                boek.AuteurId = viewModel.SelectedAuteurId;
+                boek.IsAvailable = viewModel.IsAvailable;
+                boek.IsNewRelease = viewModel.IsNewRelease;
+                boek.IsBestSeller = viewModel.IsBestSeller;
+                boek.BindingType = viewModel.BindingType;
+                boek.Afbeeldingpad = afbeeldingPad;
+
+                //update Genres
+                boek.BoekGenres.Clear();
+                if (viewModel.SelectedGenres !=null)
+                {
+                    foreach (var item in viewModel.SelectedGenres)
+                    {
+                        boek.BoekGenres.Add(new BoekGenre { BoekId = boek.BoekId, GenreId = item });
+                    }
+                    
+                }
+                _context.Update(boek);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+
+            }
+            else
+            {
+                viewModel.Auteurs = await _context.Auteurs.ToListAsync();
+                viewModel.Genres = await _context.Genres.ToListAsync();
+                return View(viewModel);
+            }
+
+           
+        }
+
+        [HttpGet]
+
+                        
 
     }
 }

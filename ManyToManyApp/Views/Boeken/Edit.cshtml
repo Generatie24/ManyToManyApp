@@ -1,0 +1,106 @@
+﻿@model EditBoekViewModel
+
+<h2>Boek Editen</h2>
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="Edit" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="BoekId" />
+
+            <div class="form-group">
+                <label asp-for="Titel" class="control-label"></label>
+                <input asp-for="Titel" class="form-control" />
+                <span asp-validation-for="Titel" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="SelectedAuteurId" class="control-label"></label>
+                <select asp-for="SelectedAuteurId" class="form-control" 
+                asp-items="@(new SelectList(Model.Auteurs,"AuteurId","Naam"))"></select>
+            </div>
+
+            <div class="form-group">
+                <div class="form-group">
+                    <input type="checkbox" asp-for="IsAvailable" class="form-check-input" />
+                    <label>IsAvailable</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-group">
+                    <input type="checkbox" asp-for="IsNewRelease" class="form-check-input" />
+                    <label>IsNewRelease</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-group">
+                    <input type="checkbox" asp-for="IsBestSeller" class="form-check-input" />
+                    <label>IsBestSeller</label>
+                </div>
+            </div>
+
+            <label class="mt-2"><b>Type Binding</b></label>
+            <div class="form-group">
+                @foreach (var binding in Enum.GetValues<BindingType>())
+                {
+                    <div class="form-check">
+                        <input type="radio" asp-for="BindingType" value="@binding" class="form-check-input" />
+                        <label>@binding</label>
+                    </div>
+                }
+            </div>
+            <span asp-validation-for="BindingType" class="text-danger"></span>
+
+            <div class ="form-group">
+                <label>Genres</label><br />
+                @foreach (var genre in Model.Genres)
+                {
+                    <div class="form-check">
+                        <input type="checkbox" name="SelectedGenres" value="@genre.GenreId" 
+                        class="form-check-input" @(Model.SelectedGenres.Contains(genre.GenreId) ? "checked" : "")/>
+                        <label class="form-check-label">@genre.Naam</label>
+                    </div>
+                }
+            </div>
+
+            <div class="form-group">
+                <label  asp-for="Afbeelding" class="control-label"></label>
+                <input type="file" asp-for="Afbeelding" class="form-control-file" onchange="previewImage(event)"/>
+                <span asp-validation-for="Afbeelding" class="text-danger"></span>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.AfbeeldingPad))
+            {
+                <div class="form-group">
+                    <img id="afbeeldingPreview" style="height:200px;" src="@Model.AfbeeldingPad" class="img-thumbnail img-fluid" />
+                </div>
+            }
+            <div class="form-group">
+                <input type="submit" value="Bewaren" class="btn-primary" />
+
+            </div>
+
+            <div class="my-2">
+                <a asp-action="Index" class="btn btn-secondary">Terug naar de lijst</a>
+
+            </div>
+        </form>
+
+        @section Scripts {
+            <script>
+                function previewImage(event) {
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        var output = document.getElementById('afbeeldingPreview');
+                        output.style.display = 'block';
+                        output.src = reader.result;
+                    };
+                    reader.readAsDataURL(event.target.files[0]);
+                }
+            </script>
+        }
+    </div>
+
+</div>
