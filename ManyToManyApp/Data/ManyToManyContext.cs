@@ -25,14 +25,14 @@ namespace ManyToManyApp.Data
             modelBuilder.Entity<Boek>()
                 .HasOne(b => b.Auteur)
                 .WithMany(bg => bg.Boeken)
-                .HasForeignKey(b => b.AuteurId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(b => b.AuteurId);
+            //.OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Boek>()
                 .HasMany(b => b.BoekGenres)
                 .WithOne(bg => bg.Boek)
-                .HasForeignKey(b => b.BoekId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(b => b.BoekId);
+                //.OnDelete(DeleteBehavior.Cascade);
 
             //Configure Auteur
 
