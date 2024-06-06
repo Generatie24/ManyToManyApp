@@ -1,0 +1,87 @@
+﻿@model BoekDetailsViewModel
+
+<h2>Boek Editen</h2>
+
+<div class="card">
+    <div class="card-body">
+        @if (!string.IsNullOrEmpty(Model.AfbeeldingPad))
+        {
+            <div class="form-group">
+                <img id="afbeeldingPreview" style="height:200px;" src="@Model.AfbeeldingPad" class="img-thumbnail img-fluid" />
+            </div>
+        }
+
+        <div class="form-group">
+            <label asp-for="Titel" class="control-label"></label>
+            <input asp-for="Titel" disabled class="form-control" />
+        </div>
+
+        <div class="form-group">
+            <label asp-for="AuteurNaam" class="control-label"></label>
+            <input asp-for="AuteurNaam" disabled class="form-control" />
+        </div>
+
+
+        <div class="form-group">
+            <div class="form-group">
+                <input type="checkbox" asp-for="IsAvailable" disabled class="form-check-input" />
+                <label>IsAvailable</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="form-group">
+                <input type="checkbox" asp-for="IsNewRelease" disabled class="form-check-input" />
+                <label>IsNewRelease</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="form-group">
+                <input type="checkbox" asp-for="IsBestSeller" disabled class="form-check-input" />
+                <label>IsBestSeller</label>
+            </div>
+        </div>
+
+        <label class="mt-2"><b>Type Binding</b></label>
+        <div class="form-group">
+            @foreach (var binding in Enum.GetValues<BindingType>())
+            {
+                <div class="form-check">
+                    <input type="radio" disabled asp-for="BindingType" value="@binding" class="form-check-input" />
+                    <label>@binding</label>
+                </div>
+            }
+        </div>
+
+
+        <div class="row mb-2">
+            <div class="col-sm-2 font-weight-bold">Genres</div>
+            <div class="col-sm-10">
+                @foreach (var genre in Model.GenreNamen)
+                {
+                    <span class="badge" style="background-color: #007bff; color: white;">@genre</span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <form asp-action="Delete" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="BoekId" />
+        <div class="form-group">
+            <input type="submit" value="Verwijderen" class="btn-primary" />
+
+        </div>
+
+        <div class="my-2">
+            <a asp-action="Index" class="btn btn-secondary">Terug naar de lijst</a>
+
+        </div>
+    </form>
+
+
+
+</div>
+
+</div>

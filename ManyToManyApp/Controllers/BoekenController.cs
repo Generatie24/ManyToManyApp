@@ -4,6 +4,7 @@ using ManyToManyApp.Models.ViewModels;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.InteropServices;
 
 namespace ManyToManyApp.Controllers
 {
@@ -216,8 +217,53 @@ namespace ManyToManyApp.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
 
-                        
+            }
+            var boek = await _context.Boeken
+                   .Include(b => b.Auteur)
+                   .Include(b => b.BoekGenres)
+                   .ThenInclude(bg => bg.Genre)
+                   .FirstOrDefaultAsync(b => b.BoekId == id);
+            if (boek == null)
+            {
+                return NotFound();
+            }
+            var viewModel = new BoekDetailsViewModel
+            {
+                BoekId = boek.BoekId,
+                Titel = boek.Titel,
+                AuteurNaam = boek.Auteur?.Naam,
+                IsAvailable = boek.IsAvailable,
+                IsNewRelease = boek.IsNewRelease,
+                IsBestSeller = boek.IsBestSeller,
+                BindingType = boek.BindingType?.ToString(),
+                GenreNamen = boek.BoekGenres.Select(bg => bg.Genre.Naam).ToList(),
+               AfbeeldingPad = boek.Afbeeldingpad
+
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var boek = await _context.Boeken.FindAsync(id);
+            if (boek==null)
+            {
+                return NotFound();
+            }
+            // write method to delete image
+            _context.Boeken.Remove(boek);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
 
     }
 }
