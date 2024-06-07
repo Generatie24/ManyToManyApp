@@ -259,11 +259,59 @@ namespace ManyToManyApp.Controllers
             {
                 return NotFound();
             }
+
             // write method to delete image
+            VerwijderAfbeelding(boek.Afbeeldingpad);
+
             _context.Boeken.Remove(boek);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
+        private void VerwijderAfbeelding(string afbeeldingpad)
+        {
+            if (!string.IsNullOrEmpty(afbeeldingpad))
+            {
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", afbeeldingpad.TrimStart('/'));
+                if (System.IO.File.Exists(path))
+                {
+                    System.IO.File.Delete(path);
+                }
+            }
+        }
+
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var boek = await _context.Boeken
+                .Include(b => b.Auteur)
+                .Include(b => b.BoekGenres)
+                    .ThenInclude(bg => bg.Genre)
+                .FirstOrDefaultAsync(b => b.BoekId == id);
+
+            if (boek == null)
+            {
+                return NotFound();
+            }
+
+            var viewModel = new BoekDetailsViewModel
+            {
+                BoekId = boek.BoekId,
+                Titel = boek.Titel,
+                AuteurNaam = boek.Auteur?.Naam,
+                IsAvailable = boek.IsAvailable,
+                IsNewRelease = boek.IsNewRelease,
+                IsBestSeller = boek.IsBestSeller,
+                BindingType = boek.BindingType?.ToString(),
+                GenreNamen = boek.BoekGenres.Select(bg => bg.Genre.Naam).ToList(),
+                AfbeeldingPad = boek.Afbeeldingpad
+            };
+
+            return View(viewModel);
+        }
     }
 }
